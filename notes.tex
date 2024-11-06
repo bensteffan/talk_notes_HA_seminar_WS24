@@ -1,0 +1,349 @@
+\documentclass[topology]{bsteffan-notes}
+\addbibresource{references.bib}
+
+\title{$\infty$-Operads, their Algebras and Modules}
+\subtitle{Seminar Bonn WS 2024/25}
+\author{Ben Steffan}
+\date{\DTMdisplaydate{2024}{11}{05}{-1}}
+
+\newcommand{\cC}{{\mathcal{C}}}
+\newcommand{\cD}{{\mathcal{D}}}
+\newcommand{\cO}{{\mathcal{O}}}
+\newcommand{\cM}{{\mathcal{M}}}
+
+\newcommand{\fa}{{\mathfrak{a}}}
+\newcommand{\fm}{{\mathfrak{m}}}
+
+\DeclareNamedOperator{Mul}
+\DeclareNamedOperator{LMod}
+
+\DeclarePairedDelimiter{\FSn}{\langle}{\rangle}
+
+\DefineCategory{Fin}
+\DefineCategory{Op}
+\DefineCategory{COp}
+
+\newcommand{\Comm}{\mathrm{Comm}}
+\newcommand{\Triv}{\mathrm{Triv}}
+\newcommand{\Assoc}{\mathrm{Assoc}}
+\newcommand{\LM}{\mathrm{LM}}
+
+\newcommand{\Alg}{\mathrm{Alg}}
+\newcommand{\CAlg}{\mathrm{CAlg}}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section[\texorpdfstring{$\infty$}{Infinity}-Operads]{From Colored to \texorpdfstring{$\infty$}{Infinity}-Operads}
+Our starting point will be something 1-categorial, namely the concept of colored operads, also sometimes called multicategories.
+\begin{definition}[{\cite[Definition 2.1.1.1]{lurie_higher_2017}}]
+	Let $[n] \coloneq \{1, \ldots, n\}$ for each $n \in \N$.
+	A \emph{colored operad} or \emph{multicategory} $\cO$ consists of the following data\footnote{Lurie actually admits all finite sets as indexing sets, not just the $[n]$. We restrict to the $[n]$ to avoid ambiguities with the bracketing of (tensor) products in the examples below.}:
+	\begin{enumerate}
+		\item A collection $\{X, Y, Z, \ldots\}$ of \emph{objects} or \emph{colors} of $\cO$.
+			As always, we write $X \in \cO$ to denote that $X$ is an object of $\cO$.
+		\item For every $n$, collection of objects $\{X_i\}_{i \in [n]}$ of $\cO$, and every object $Y \in \cO$, a collection $\Mul_{\cO}(\{X_i\}_{i \in [n]}, Y)$ of \emph{morphisms} from $\{X_i\}_{i \in [n]}$ to $Y$.
+		\item For every map of finite sets $\alpha\colon [n] \to [m]$, every finite collection of objects $\{X_i\}_{i \in [n]}$, every finite collection of objects $\{Y_j\}_{j \in J}$, and every object $Z \in \cO$, a composition map
+			\begin{equation*}
+				\prod_{j \in [m]} \Mul_{\cO}(\{X_i\}_{i \in \alpha^{-1}(j)}, Y_j) \times \Mul_{\cO}(\{Y_j\}_{j \in [m]}, Z) \to \Mul_{\cO}(\{X_i\}_{i \in [n]}, Z)
+			\end{equation*}
+			Here we implicitly identify $\alpha^{-1}(j)$ with the set $[k]$ where $k = |\alpha^{-1}(j)|$.
+		\item A collection of morphisms $\{\id_X \in \Mul_{\cO}(\{X\}, X)\}_{X \in \cO}$ which are both left and right units for the composition on $\cO$ in the following sense: For every finite collection of objects $\{X_i\}_{i \in [n]}$ and every object $Y \in \cO$, the compositions
+			\begin{align*}
+				\Mul_\cO(\{X_i\}_{i \in [n]}, Y) &\isom \Mul_\cO(\{X_i\}_{i \in [n]}, Y) \times \{\id_Y\} \\
+												 &\subseteq \Mul_\cO(\{X_i\}_{i \in [n]}, Y) \times \Mul_\cO(\{Y\}, Y) \\
+												 &\to \Mul_\cO(\{X_i\}_{i \in [n]}, Y)
+			\end{align*}
+			and
+			\begin{align*}
+				\Mul_\cO(\{X_i\}_{i \in [n]}, Y) &\isom \prod_{i \in [n]} \{\id_{X_i}\} \times \Mul_\cO(\{X_i\}_{i \in [n]}, Y) \\
+												 &\subseteq \prod_{i \in [n]} \Mul_\cO(\{X_i\}, X_i) \times \Mul_\cO(\{X_i\}_{i \in [n]}, Y) \\
+												 &\to \Mul_\cO(\{X_i\}_{i \in [n]}, Y)
+			\end{align*}
+			both coincide with the identity of $\Mul_\cO(\{X_i\}_{i \in I}, Y)$.
+		\item Composition is associative in the following sense: For every sequence of maps $[n] \xto{\alpha} [m] \xto{\beta} [l]$ and collections of objects $\{W_i\}_{i \in [n]}$, $\{X_j\}_{j \in [m]}$, $\{Y_k\}_{k \in [l]}$, and every object $Z \in \cO$, the diagram
+			\begin{equation*}
+				\begin{tikzcd}[
+						column sep = {8em, between origins}, 
+						font = \scriptsize, 
+						scale = 0.5,
+						every arrow/.append style = {shorten <= 3ex, shorten >= 3ex, thin}
+					]
+						& \mathclap{\prod_{j \in [m]} \Mul_\cO(\{W_i\}_{i \in \alpha^{-1}(j)}, X_j) \times \prod_{k \in [l]} \Mul_\cO(\{X_j\}_{j \in \beta^{-1}(k)}, Y_k) \times \Mul_\cO(\{Y_k\}_{k \in k}, Z)}
+							\ar[dl]
+							\ar[dr]
+					\\
+					\mathclap{\prod_{k \in [l]} \Mul_\cO(\{W_i\}_{i \in \alpha^{-1}(k)}, Y_k) \times \Mul_\cO(\{Y_k\}_{k \in [l]}, Z)}
+							\ar[dr]
+						& & \mathclap{\prod_{j \in [m]} \Mul_\cO(\{W_i\}_{i \in \alpha^{-1}(j)}, X_j) \times \Mul_\cO(\{X_j\}_{j \in [m]}, Z)}
+							\ar[dl]
+					\\
+						& \mathclap{\Mul_\cO(\{W_i\}_{i \in [n]}, Z)}
+				\end{tikzcd}
+			\end{equation*}
+			commutes.
+	\end{enumerate}
+\end{definition}
+\begin{remark}[{\cite[Remark 2.1.1.2]{lurie_higher_2017}}]
+	To each colored operad $\cO$ there is an \emph{underlying category} (also denoted\footnote{Abuse of notation is a common theme throughout these notes.} by $\cO$) with objects those of $\cO$ and mapping sets given by $\Hom_\cO(X, Y) \coloneq \Mul_\cO(\{X\}, Y)$. 
+\end{remark}
+\begin{example}[Motivating example, {\cite[Example 2.1.1.5]{lurie_higher_2017}}]
+	Let $(\cC, \tensor)$ be a symmetric monoidal category.
+	We obtain a colored operad (also denoted $\cC$) on the same objects as $\cC$ via
+	\begin{equation*}
+		\Mul_\cC(\{X_i\}_{i \in [n]}, Y) \coloneq \Hom_\cC(\bigtensor_{i \in [n]} X_i, Y)
+	\end{equation*}
+	In particular, if $\cC = \Vect_k$, the category of vector spaces over a field $k$, then we have a natural identification
+	\begin{equation*}
+		\Mul_{\Vect_k}(\{V_i\}_{i \in [n]}, W) \isom \operatorname{Multilin}_k(\bigtimes_{i \in [n]} X_i, Y)
+	\end{equation*}
+	motivating the name \enquote{multicategories.}
+\end{example}
+\begin{example}[Motivating example \#2, {\cite[Example 2.1.1.6]{lurie_higher_2017}}]
+	Let $\cO$ be a ($\Set$-valued) operad.
+	Then $\cO$ naturally carries the structure of a colored operad on a single color $\mathbf{1}$, where we identify $\Mul_{\cO}(\{\mathbf{1}\}_{i \in I}, \mathbf{1})$ with $\cO_n$, with composition given by that of $\cO$.
+	In this sense colored operads are generalisations of operads.
+\end{example}
+\begin{remark}
+	We assure the reader that, even though there is no explicit action of the symmetric groups apparent, the encoded notion is that of a symmetric operad, and comes about by the action of the automorphism group $\Aut([n])$ in $\Set$.
+	The next definition will make this easier to spot.
+\end{remark}
+Colored operads are interesting in their own right, but it's rather unclear \emph{prima facie} how this ought to generalize to $\infty$-categories. 
+After all, the definition of colored operad we gave yields a new and strange kind of object, in particular something that is not on the nose encoded through the language of categories, functors, spaces, or any other object we know how to lift to the $\infty$-categorial world.
+
+Our next goal is thus to repackage the definition in a more convenient format.
+As it turns out, this has the pleasant side effect of yielding something with \enquote{symmetric} morphism sets, as opposed to the inherent many-to-one character of morphisms in colored operads.
+Before we do this, however, let us recall some terminology from Semen's talk and introduce some of our own.
+\begin{definition}
+	Let $\Fin_*$ (sometimes known as \emph{Segal's category}) denote the category with objects the finite pointed sets $\FSn{n} \coloneq \{*, 1, \ldots, n\}$ ($n \in \N$) and morphisms the maps of pointed between them.
+	We call a morphism $\alpha\colon \FSn{n} \to \FSn{m}$ in $\Fin_*$
+	\begin{enumerate}
+		\item \emph{inert} if $|\alpha^{-1}(i)| = 1$ for all $i = 1, \ldots, m$,
+		\item \emph{injective} or \emph{semi-inert} if $|\alpha^{-1}(i)| \leq 1$ for all $i = 1, \ldots, m$, and
+		\item \emph{active} if $\alpha^{-1}(*) = \{*\}$.
+	\end{enumerate}
+
+	Further, recall the distinguished morphisms (sometimes known as the \emph{Segal maps}) $\rho^i\colon \FSn{n} \to \FSn{1}$ in $\Fin_*$ given by 
+	\begin{equation*}
+		\rho^i(j) = \begin{cases}
+			1 & j = i \\
+			0 & \text{else}
+		\end{cases}
+	\end{equation*}
+	for each $n$.
+\end{definition}
+\begin{definition}[{\cite[Construction 2.1.1.7]{lurie_higher_2017}}]
+	Let $\cO$ be a colored operad.
+	Define a category $\cO^\tensor$, called the \emph{category of operators of $\cO$}, as follows:
+	\begin{enumerate}
+		\item The objects of $\cO^\tensor$ are finite sequences of colors $X_1, \ldots, X_n \in \cO$.
+		\item Given two sequences of colors $X_1, \ldots, X_m, Y_1, \ldots, Y_n \in \cO$, a morphism from $\{X_i\}_{1 \leq i \leq m}$ to $\{Y_j\}_{1 \leq j \leq n}$ is given by a map $\alpha\colon \FSn{m} \to \FSn{n}$ in $\Fin_*$ together with a collection of morphisms $\{\phi_j \in \Mul_\cO(\{X_i\}_{i \in \alpha^{-1}(j)}, Y_j)\}_{1 \leq j \leq n}$ in $\cO$.
+		\item Composition in $\cO^\tensor$ is determined by the composition laws on $\Fin_*$ and on the colored operad $\cO$.
+	\end{enumerate}
+\end{definition}
+This category $\cO^\tensor$ by definition comes with a forgetful functor $p\colon \cO^\tensor \to \Fin_*$, and this can be used to reconstruct the original colored operad $\cO$ (up to equivalence):
+For a start, we recover the underlying category $\cO$ as $\cO^\tensor_{\langle 1\rangle} \coloneq p^{-1}(\langle 1\rangle)$ (we will denote fibres by subscripts throughout).
+Moreover, the $\rho^i$ induce functors $\rho^i_!\colon \cO^\tensor_{\langle n\rangle} \to \cO^\tensor_{\langle 1\rangle} \eqv \cO$ which together determine an equivalence $\cO^\tensor_{\langle n\rangle} \eqv \cO^n$ (this is not hard to check directly and we leave it as an exercise).
+We then recover $\Mul_{\cO}(\{X_i\}_{1 \leq i \leq n}, Y)$ as the set of morphisms $f\colon (X_1, \ldots, X_n) \to Y$ in $\cO^\tensor$ such that $p(f)\colon \langle n\rangle \to \langle 1\rangle$ is active.
+The composition map and its structure can also be recovered, using more work.
+
+In other words, passing to the category of operators loses no information about the colored operad $\cO$, so we can essentially redefine what a colored operad is:
+It is a forgetful functor $p\colon \cO^\tensor \to \Fin_*$ with certain properties, in particular that the $\rho^i$ induce equivalences $\cO^\tensor_{\langle n\rangle} \eqv (\cO^{\tensor}_{\langle 1 \rangle})^n$.
+This is now much more amenable to translation into the $\infty$-categorial setting, provided that we can formulate all the requirements on the functor $p$ in purely $\infty$-categorial terms.
+It turns out we can:
+\begin{definition}[{\cite[Definition 2.1.1.10]{lurie_higher_2017}}]
+	An \emph{$\infty$-operad} is an $\infty$-category $\cO^\tensor$ together with a functor $p\colon \cO^\tensor \to N\Fin_*$ which satisfies the following conditions:
+	\begin{enumerate}
+		\item For every inert morphism $f\colon \FSn{m} \to \FSn{n}$ in $\Fin_*$ and every object $C \in \cO^\tensor_{\FSn{m}}$, there exists a $p$-cocartesian morphism $\close{f}\colon C \to C'$ in $\cO^\tensor$ lifting $f$.
+			In particular, $f$ induces a functor $f_!\colon \cO^\tensor_{\FSn{m}} \to \cO^\tensor_{\FSn{n}}$ (note that the fibres are $\infty$-categories since $p$ is an inner fibration: it's codomain is the nerve of a 1-category).
+		\item Let $C \in \cO^\tensor_{\FSn{m}}$ and $C' \in \cO^\tensor_{\FSn{n}}$ be objects, $f\colon \FSn{m} \to \FSn{n}$ a morphism in $\Fin_*$, and let $\Map^f_{\cO^\tensor}(C, C')$ be the union of those connected components of $\Map_{\cO^\tensor}(C, C')$ lying over $f$.
+			Choose $p$-cocartesian morphisms $C' \to C'_i$ lying over the inert morphisms $\rho^i\colon \FSn{n} \to \FSn{1}$ for $1 \leq i \leq n$.
+			Then the induced map
+			\begin{equation*}
+				\Map^f_{\cO^\tensor}(C, C') \to \prod_{i = 1}^n \Map^{\rho^i \circ f}_{\cO^\tensor}(C, C'_i)
+			\end{equation*}
+			is an equivalence.
+		\item For each $n \geq 0$, the functors $\{\rho^i_!\colon \cO^\tensor_{\FSn{n}} \to \cO^\tensor_{\FSn{1}}\}$ determine an equivalence of $\infty$-categories $\phi\colon \cO^\tensor_{\FSn{n}} \to (\cO^\tensor_{\FSn{1}})^n$ (this is known as the \emph{Segal condition})\footnote{Lurie gives a different version of axiom 3, which by \cite[Remark 2.1.1.14]{lurie_higher_2017} is equivalent to our definition.}.
+	\end{enumerate}
+\end{definition}
+We immediately recover some of the colored operad structure in this setting:
+\begin{definition}[{\cite[Remark 2.1.1.12 \& Notation 2.1.1.16]{lurie_higher_2017}}]
+	Given an $\infty$-operad $p\colon \cO^\tensor \to N\Fin_*$, we define its \emph{underlying $\infty$-category} to be $\cO \coloneq \cO^\tensor_{\FSn{1}}$.
+	We identify objects of $X \in \cO^\tensor_{\FSn{n}}$ with tuples $(X_1, \ldots, X_n) \in \cO^n$ up to equivalence using the Segal condition and write this as $X \eqv X_1 \dsum \cdots \dsum X_n$.
+\end{definition}
+
+It is natural to ask whether the functor $p$ in the definition of $\infty$-operad is \enquote{nice} in some abstract sense, e.g. if it is some kind of fibration. 
+We have already remarked that $p$ is an inner fibration, but can we do better?
+The answer is \enquote{yes,} but not by that much (in the sense of \cite[Remark 2.0.0.5]{lurie_higher_2009}):
+\begin{proposition}[{\cite[Remark 2.1.1.13]{lurie_higher_2017}}]
+	An $\infty$-operad $p\colon \cO^\tensor \to N\Fin_*$ is a categorical fibration.
+\end{proposition}
+\begin{proof}
+	Since a categorical fibration (of $\infty$-categories) is an inner fibration that is also an isofibration\footnote{For these notes you may take this as the definition.} (\cite[Corollary 2.4.6.5]{lurie_higher_2009}), it suffices to show for any object $C \in \cO^\tensor_{\FSn{m}}$ and any isomorphism $\alpha\colon \FSn{m} \to \FSn{n}$ that there exists a lift $\alpha'\colon C \to C'$ in $\cO^\tensor$ which is an equivalence (this is essentially the definition of \emph{isofibration}). 
+	But isomorphisms in $\Fin_*$ are inert, so condition 1 in the definition of $\infty$-operad yields a $p$-cocartesian lift which is then in particular an equivalence.
+\end{proof}
+Having done some theoretical work with the definition, let us give a few examples:
+\begin{example}
+	The nerve of any colored operad is an $\infty$-operad.
+	In particular, we obtain the following examples (note that we abuse notation to identify colored operads with the categories of operators):
+	\begin{enumerate}
+		\item The \emph{Commutative $\infty$-operad} $\Comm^\tensor$ is given by the nerve of the identity $N(\Fin_* \xto{\id} \Fin_*)$.
+		\item The \emph{Trivial $\infty$-operad} $\Triv^\tensor$ is the nerve of the inclusion $N(\Fin_*^\mathrm{inert} \incl \Fin_*)$ where $\Fin_*^\mathrm{inert} \subseteq \Fin_*$ is the subcategory containing only the inert morphisms.
+		\item $\mathbb{E}_0^\tensor$ is the $\infty$-operad $N(\Fin^{\mathrm{inj}}_* \incl \Fin_*)$ where $\Fin^{\mathrm{inj}}_*$ is the subcategory of $\Fin_*$ containing only the injective morphisms.
+		\item The \emph{Associative $\infty$-operad} $\Assoc^\tensor$ is the nerve of the (category of operators of the) colored operad $\mathbf{Assoc}$ with one object $\fa$, morphism sets $\Mul_{\mathbf{Assoc}}(\{\fa_i\}_{i \in [n]}, \fa)$ given by the linear orderings on $[n]$, and composition given as follows:
+			Given a map $\alpha\colon [n] \to [m]$, an ordering $\preceq$ on $[m]$ and orderings $\preceq'_j$ on $\alpha^{-1}(j)$ for all $j \in [m]$, we define an order $\preceq''$ on $[n]$ by declaring that $a \preceq'' b$ if $\alpha(a) \prec \alpha(b)$ or $\alpha(a) = \alpha(b)$ and $a \preceq'_{\alpha(a)} b$.
+	\end{enumerate}
+\end{example}
+It is also worth remarking that if $\cO$ is a simplicial colored operad (we ask the reader to come up with the correct definition of enriched colored operads on their own), then its category of operators $\cO^\tensor$ naturally carries the structure of a simplicial category, so we can take its simplicial nerve.
+As it turns out, if $\cO^\tensor$ is \emph{fibrant} (i.e. all its mapping simplicial sets are Kan complexes), then $N(\cO^\tensor \to \Fin_*)$ is an $\infty$-operad (see \cite[Proposition 2.1.1.27]{lurie_higher_2017}).
+This for instance allows lifting the little $k$-cubes operads $\mathbb{E}_k$ from Mathis' talk to $\infty$-operads.
+
+\section[Maps \& Algebras]{Maps of \& Algebras over \texorpdfstring{$\infty$}{Infinity}-operads}
+Having the definition of $\infty$-operad is of course not enough.
+As the talk last week motivated, we care primarily about \emph{algebras} over $\infty$-operads and their modules, rather than $\infty$-operads on their own.
+In order to talk about these, we will first need to talk about maps of $\infty$-operads.
+Before that, some more terminology.
+\begin{definition}
+	Let $p\colon \cO^\tensor \to N\Fin_*$ be an $\infty$-operad.
+	An \emph{inert/active} morphism in $\cO^\tensor$ is a $p$-cocartesian lift of an inert/active morphism in $N\Fin_*$, respectively.
+\end{definition}
+\begin{definition}[{\cite[Definition 2.1.2.7]{lurie_higher_2017}}]
+	Given two $\infty$-operads $p\colon \cO^\tensor \to N \Fin_*$, $p'\colon \cO'^\tensor \to N \Fin_*$, an \emph{$\infty$-operad map} from $\cO^\tensor$ to $\cO'^\tensor$ is a functor $f\colon \cO^\tensor \to \cO'^\tensor$ over $N \Fin_*$ which carries inert morphisms to inert morphisms.
+
+	We denote the full subcategory of $\Fun_{N\Fin_*}(\cO^\tensor, \cO'^\tensor)$ spanned by the $\infty$-operad maps by $\Alg_{\cO}(\cO')$ (note the abuse of notation).
+\end{definition}
+Being \enquote{over $N\Fin_*$} here means that the diagram
+\begin{equation*}
+	\begin{tikzcd}[column sep = small]
+		\cO^\tensor
+				\ar[rr, "f"]
+				\ar[dr, swap, "p"]
+			& & \cO'^\tensor
+				\ar[dl, "p'"]
+		\\
+			& N\Fin_*
+	\end{tikzcd}	
+\end{equation*}
+commutes on the nose as a diagram of simplicial sets.
+
+The notation $\Alg_{\cO}(\cO')$ might be a bit mystefying at first.
+We point out the analogy to something from algebra:
+An $R$-algebra where $R$ is a ring is simply a map $R \to S$ of rings.
+
+Since we are doing $\infty$-category theory, it will come as no surprise that we are interested in some notion of fibration between $\infty$-operads:
+\begin{definition}[{\cite[Definition 2.1.2.10]{lurie_higher_2017}}]
+	A map of $\infty$-operads $q\colon \cC^\tensor \to \cO^\tensor$ is a \emph{fibration of $\infty$-operads} if $q$ is a categorical fibration.
+\end{definition}
+The reason that the notion of categorical fibration appears here is homotopy theoretic in nature: There is a model structure on the category of $\infty$-preoperads in which the fibrations are the categorical fibrations of $\infty$-(pre)operads, so this notion is homotopy-theoretically meaningful. 
+This is a story for another day, however, and for the purpose of this talk we simply think of this as a necessary technical condition.
+
+We also have a stronger notion of \emph{cocartesian fibration of $\infty$-operads} which can be characterized as follows:
+\begin{proposition}[{\cite[Proposition 2.1.2.12]{lurie_higher_2017}}]
+	Let $p\colon \cO^\tensor \to N\Fin_*$ be an $\infty$-operad and $q\colon \cC^\tensor \to \cO^\tensor$ a cocartesian fibration of $\infty$-categories.
+	Then the following conditions are equivalent:
+	\begin{enumerate}
+		\item The composite $\cC^\tensor \xto{q} \cO^\tensor \xto{p} N\Fin_*$ exhibits $\cC^\tensor$ as an $\infty$-operad.
+		\item For every object $T \eqv T_1 \dsum \cdots \dsum T_n \in \cO^\tensor_{\FSn{n}}$, the inert morphisms $T \to T_i$ induce an equivalence of $\infty$-categories $\cC^\tensor_T \eqv \prod_{i = 1}^n \cC^\tensor_{T_i}$.
+	\end{enumerate}
+	If either (and therefore both) conditions are satisfied, we say that $p$ is a \emph{cocartesian fibration of $\infty$-operads}, and that \emph{$p$ exhibits $\cC^\tensor$ as an $\cO$-monoidal category.}
+\end{proposition}
+\begin{proof}[Proof sketch]
+	Seeing that 1 implies 2 is not so difficult:
+	First off, $q$ preserves inert morphisms since the $(p \circ q)$-cocartesian morphisms $f$ such that $p(f)$ is $q$-cocartesian are precisely the $p$-cocartesian morphisms (see \cite[Proposition 2.4.1.3]{lurie_higher_2009}).
+	Applying this to lifts of the $\rho^i$, we obtain a (homotopy) commutative diagram
+	\begin{equation*}
+		\begin{tikzcd}
+			\textcolor{gray}{\cC^\tensor_T}
+					\ar[r, gray]
+					\ar[d, gray, swap, "\eqv"]
+				& \cC^\tensor_{\FSn{n}}
+					\ar[r]
+					\ar[d, "\eqv"]
+				& \cO^\tensor_{\FSn{n}}
+					\ar[d, "\eqv"]
+			\\
+			\textcolor{gray}{\prod_{i = 1}^n \cC^\tensor_{T_i}}
+					\ar[r, gray]
+				& \cC^n
+					\ar[r]
+				& \cO^n
+		\end{tikzcd}
+	\end{equation*}
+	Taking fibres as indicated in \textcolor{gray}{gray} whilst noting that fibres of $p$-cocartesian fibrations are homotopy fibres (\cite[Corollary 3.3.1.4]{lurie_higher_2009}), it follows that the induced map, too, must be an equivalence.
+
+	Conversely, if 2 holds then it is easy to see that axiom 1 of the definition of $\infty$-operad is satisfied, by the same characterization of of $p$-cocartesian morphisms used above, and so does the Segal condition. 
+	Axiom 2 is verified using similar techniques; this we leave as an exercise.
+\end{proof}
+As an immediate consequence, we recover the definition of symmetric monoidal category as a $\Comm^\tensor$-monoidal category (recall that a symmetric monoidal category is a cocartesian fibration $\cC^\tensor \to N\Fin_*$ which satisfies the Segal condition).
+
+The notion of (lax) symmetric monoidal functor also generalizes without issue:
+\begin{definition}[{\cite[Definition 2.1.3.7]{lurie_higher_2017}}]
+	Let $\cO^\tensor$ be an $\infty$-operad and let $p\colon \cC^\tensor \to \cO^\tensor$ and $q\colon \cD^\tensor \to \cO^\tensor$ be cocartesian fibrations of operads.
+	An $\infty$-operad map $f \in \Alg_{\cC}(\cD)$ is called a \emph{lax $\cO$-monoidal functor}.
+	It is called an \emph{$\cO$-monoidal functor} if it additionally carries $p$-cocartesian morphisms to $q$-cocartesian morphisms.
+
+	We denote by $\Fun_{\cO}^\tensor(\cC, \cD)$ the full subcategory of $\Fun_{\cO^\tensor}(\cC^\tensor, \cD^\tensor)$ spanned by the $\cO$-monoidal functors.
+\end{definition}
+These are a quite a few definitions, and we should take some time to consider examples, but since Semen already explained how to think about the case of symmetric monoidal categories, we leave the reader to contemplate on their own how to come up with the structure maps and pictures for cocartesian fibrations over the other $\infty$-operads we have introduced (in fact we highly recommend this as an exercise to get familiar with $\infty$-operads).
+Now that we have the basics down, we can talk about algebra objects.
+\begin{definition}[{\cite[Definition 2.1.3.1]{lurie_higher_2017}}]
+	Let $p\colon \cC^\tensor \to \cO^\tensor$ be a fibration of $\infty$-operads and suppose we are also given a map $\alpha\colon \cO'^\tensor \to \cO^\tensor$ of $\infty$-operads.
+	We denote by $\Alg_{\cO' / \cO}(\cC)$ the full subcategory of $\Fun_{\cO^\tensor}(\cO'^\tensor, \cC^\tensor)$ spanned by the $\infty$-operad maps.
+	
+	When $\cO^\tensor = \cO'^\tensor$ and $\alpha$ is the identity, we shorten our notation to $\Alg_{/ \cO}(\cC)$.
+\end{definition}
+Put into diagrams, the objects of $\Alg_{\cO' / \cO}(\cC)$ identify with commutative diagrams
+\begin{equation*}
+	\begin{tikzcd}[column sep = small]
+		\cO'^\tensor
+				\ar[rr]
+				\ar[dr, swap, "\alpha"]
+			& & \cC^\tensor
+				\ar[dl, "p"]
+		\\
+			& \cO^\tensor
+	\end{tikzcd}
+\end{equation*}
+Plugging in $\alpha = \id_{\cO^\tensor}$, we see that the objects of $\Alg_{/ \cO}(\cC)$ identify with \emph{($\infty$-operadic) sections of $p$}.
+
+As a special case, when $\cO^\tensor = \Comm^\tensor$, we define the \emph{$\infty$-category of commutative algebra objects of $\cC$} as $\CAlg(\cC) \coloneq \Alg_{/ \Comm^\tensor}(\cC) = \Alg_{\Comm^\tensor}(\cC)$.
+We will then also write $\Fun^\tensor(\cC, \cD) \coloneq \Fun_{\Comm^\tensor}^\tensor(\cC, \cD)$ and refer to its objects as \emph{symmetric monoidal functors} from $\cC^\tensor$ to $\cD^\tensor$.
+
+We now take the time to discuss an example: Fix a symmetric monoidal $\infty$-category $\cC^\tensor \to \Comm^\tensor$ and let $A \in \CAlg(\cC)$ be a commutative algebra object in $\cC$, which we identify with a section $s\colon \Comm^\tensor \to \cC^\tensor$.
+This means we have an object $A = s(\FSn{1})$, and similar an object $B \dsum C = s(\FSn{2})$.
+But then we must already have $B \eqv A \eqv C$: If $\iota^1\colon \FSn{1} \to \FSn{2}$ is the map sending 1 to 1, then $\rho^1 \circ \iota^1 = \id_{\FSn{1}}$, so under the Segal equivalence $\cC^\tensor_{\FSn{2}} \eqv \cC^2$ both elements of the product picked out by images of these morphisms applied to $A$ must be equivalent to $A$.
+We then obtain a multiplication map $A \dsum A \to A$ by applying $s$ to the active morphism $\FSn{2} \to \FSn{1}$.
+In an analogous fashion to Semen's example, we recover all the usual identies up to \emph{unique} homotopies (since homotopies in $\Comm^\tensor$ are unique, seeing as it is the nerve of a 1-category) by applying $s$ to suitable commutative diagrams in $\Comm^\tensor$.
+
+\section[Modules]{Modules over Algebras}\footnote{The author unfortunately could, for time reasons, not cover this section in his talk. Beware of this if you want to rely on this material for a later talk!}
+We finally want to discuss modules over algebra objects over some $\infty$-operad $\cO^\tensor$.
+Unfortuntely, the definition of modules over a general $\infty$-operad alone requires amounts of technical effort prohibitive for this talk, including first defining and subsequently imposing technical conditions on the $\infty$-operad $\cO^\tensor$ (the skeptical reader we recommend to pick up their copy of \cite{lurie_higher_2017} and read from the beginning of section 3.3.3 through Definition 3.3.3.8).
+
+We will therefore only discuss a special case: Left modules over $\Assoc^\tensor$ which we can set up rather directly.
+\begin{definition}[{\cite[Definition 4.2.1.1]{lurie_higher_2017}}]
+	The \emph{left module $\infty$-operad} $\LM^\tensor$ is the nerve of the (category of operators of the) colored operad $\mathbf{LM}$ with two objects $\mathfrak{a}$ and $\mathfrak{m}$ and morphism sets $\Mul_{\mathbf{LM}}(\{X_i\}_{i \in [n]}, Y)$ defined as follows:
+	If $Y = \mathfrak{a}$, then it consists of all linear orderings of $[n]$, provided that $X_i = \mathfrak{a}$ for all $i \in [n]$, and is empty else; otherwise $Y = \mathfrak{m}$ and it is given by the linear orderings $i_1 < \ldots < i_n$ of $[n]$ such that $X_{i_n} = \mathfrak{m}$ and $X_{i_j} = \mathfrak{a}$ else.
+	Moreover, if $n = 0$, we by convention define $\Mul_{\mathbf{LM}}(\{X_i\}_{i \in [n]}, Y) \coloneq \emptyset$.
+	Composition is then defined in analogy to the composition rule in the definition of $\mathbf{Assoc}$.
+\end{definition}
+Note that there is a map of colored operads\footnote{This notion is just what you expect it to be. We invite the reader to work this out on their own.} $\mathbf{LM} \to \mathbf{Assoc}$: An operation in $\Mul_{\mathbf{LM}}(\{X_i\}_{i \in [n]}, Y)$ determines a linear ordering on $[n]$ and therefore a morphism in $\Mul_{\mathbf{Assoc}}(\{\fa_i\}_{i \in [n]}, \fa)$.
+This map gives rise to a fibration of $\infty$-operads $\LM^\tensor \to \Assoc^\tensor$. (This is not hard to see: all that is to check is that it is an isofibration.)
+
+There is also an obvious inclusion map $\mathbf{Assoc} \incl \mathbf{LM}$ (mapping $\fa \in \mathbf{Assoc}$ to $\fa \in \mathbf{LM}$) which gives rise to a section of this fibration. 
+In light of this, we identify $\Assoc^\tensor$ with a full subcategory of $\LM$.
+\begin{definition}
+	Let $\cC^\tensor$ be a monoidal $\infty$-category.
+	The \emph{$\infty$-category of left modules in $\cC$} is given by 
+	\begin{equation*}
+		\LMod(\cC) \coloneq \Alg_{\LM / \Assoc}(\cC)
+	\end{equation*}
+\end{definition}
+Let us unravel what this means:
+Given $f \in \LMod(\cC)$, the restriction $f|_{\Assoc^\tensor}$ must be an algebra object of $\cC$ (which the module is going to be over), which we will (by abuse of notation) identify with $A \coloneq f(\fa)$.
+We also obtain an object $M \coloneq f(\fm)$; this will be our module.
+Applying $f$ to the unique operation in $\Mul_{\mathbf{\LM}}(\{\fa, \fm\}, \fm)$ then yields a map $A \tensor M \to M$ in $\cC$ which is the module multplication.
+Looking at $\Mul_{\mathbf{\LM}}(\{\fa, \fa, \fm\}, \fm)$ then recovers compatibility with the algebra structure on $\fa$, and so on, much in the same way as we discussed in our example in the last section.
+
+\printbibliography
+\end{document}
